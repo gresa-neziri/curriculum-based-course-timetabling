@@ -294,8 +294,8 @@ namespace Curriculum_Based_Course_timetabling.Models
 
         public void Perturb()
         {
-            //for (int i = 0; i < 10; i++)
-               SwapCourses();
+            for (int i = 0; i < 10; i++)
+                ChangeTimeslotMutation();
         }
 
         public void ChangeRoomMutation()
