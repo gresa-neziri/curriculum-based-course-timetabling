@@ -16,5 +16,10 @@ namespace Curriculum_Based_Course_timetabling.Models
             this.Period = Period;
             this.Day = Day;
         }
+
+        public Timeslot ShallowCopy()
+        {
+            return (Timeslot)this.MemberwiseClone();
+        }
     }
 }

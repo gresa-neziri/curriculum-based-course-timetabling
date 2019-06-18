@@ -15,5 +15,11 @@ namespace Curriculum_Based_Course_timetabling.Models
         {
             this.Id = Id;
         }
+
+        public Room ShallowCopy()
+        {
+            return (Room)this.MemberwiseClone();
+        }
+
     }
 }

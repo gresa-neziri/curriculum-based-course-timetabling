@@ -11,7 +11,7 @@ namespace Curriculum_Based_Course_timetabling
     {
         readonly int iterations;
 
-        public ILS(int iterations =100)
+        public ILS(int iterations =200)
         {
             this.iterations = iterations;
         }
@@ -21,7 +21,7 @@ namespace Curriculum_Based_Course_timetabling
             DateTime startTime = DateTime.Now;
             Random rnd = new Random();
             int iterations_count = 0;
-            List<int> T = new List<int>() { 15, 11, 12,10, 14,15};
+            List<int> T = new List<int>() { 15, 11, 12,100, 14,15};
             Solution S = new Solution();
             S.assignments = S.GenerateSolution();
             Console.WriteLine("Score ne fillim : {0}",S.GetScore());

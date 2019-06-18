@@ -288,14 +288,13 @@ namespace Curriculum_Based_Course_timetabling.Models
 
         public void Tweak()
         {
-            //ChangeTimeslotMutation();
-            SwapCourses();
+            ChangeTimeslotMutation();
         }
 
         public void Perturb()
         {
             for (int i = 0; i < 10; i++)
-                ChangeTimeslotMutation();
+                SwapCourses();
         }
 
         public void ChangeRoomMutation()
@@ -316,7 +315,6 @@ namespace Curriculum_Based_Course_timetabling.Models
             rnd = random.Next(goodRooms.Count());
 
             candidateAssginment.room = goodRooms.ElementAt(rnd).Value;
-
 
             newSolution.assignments.RemoveAll(x => x.course.Id == candidateAssginment.course.Id);
 
@@ -402,46 +400,25 @@ namespace Curriculum_Based_Course_timetabling.Models
                     {
                         hasDifference = true;
                         var sol = daySolutions.First(x => x.course.Id == sameCurricula[i].course.Id);
-                        FindSlot(dayIndex, sol.course,sol);
-                        
+                        FindSlot(dayIndex, sol);
+
                     }
                 }
             }
         }
 
-        public void FindSlot(int dayIndex, Course course, Assignment sol)
+        public bool FindSlot(int dayIndex, Assignment sol)
         {
-           
+
+            Timeslot timeslot = null;
+            Assignment assignment = null;
+            bool status = false;
             Solution s = new Solution();
             s = s.Copy(assignments);
 
-            this.assignments.RemoveAll(x => x.course.Id == sol.course.Id);
+            s.assignments.RemoveAll(x => x.course.Id == sol.course.Id);
 
-      
-            Timeslot timeslot = null;
-            Random random = new Random();
-            Assignment assignment = null;
-            bool status = false;
-
-            //find valid room
-            var r = new List<Room>();
             Room room = null;
-            foreach (var i in Instance.Rooms.Values)
-            {
-                if (sol.course.ConstraintValidRooms.Where(x => x.Id == i.Id).Count() < 1)
-                {
-                    r.Add(i);
-                }
-            }
-            if (r.Where(x => x.Size >= course.Students).Count() > 0)
-            {
-                int size = r.Where(x => x.Size >= sol.course.Students).Count();
-                room = r.Where(x => x.Size >= sol.course.Students).ElementAt(random.Next(0, size));
-            }
-            else
-            {
-                room = r.ElementAt(random.Next(0, r.Count()));
-            }
 
             bool hardConstraints = false;
             for (int j = 0; j < days; j++)
@@ -455,42 +432,84 @@ namespace Curriculum_Based_Course_timetabling.Models
                     {
                         continue;
                     }
+                    room = FindRoom(timeslot, sol.course,s);
+                    if(room==null)
+                    {
+                        continue;
+                    }
                     assignment = new Assignment(sol.course, room, timeslot);
-                    if (SlotRoomConstraint(assignment) == false || SlotCurriculaConstraint(assignment) == false || SlotTeacherConstraint(assignment) == false)
+
+                    if (s.SlotCurriculaConstraint(assignment) == false || s.SlotTeacherConstraint(assignment) == false)
                     {
         
-                        if (i == periods_per_day - course.GetPeriods() - 1)
+                        if (i == periods_per_day - sol.course.GetPeriods() - 1)
                         {
-                            hardConstraints = false;
                             status = false;
+                            hardConstraints = false;
                             break;
                         }
-                        hardConstraints = false;
+
                         status = false;
+                        hardConstraints = false;
                         continue;
                     }
                     else
                     {
-                        hardConstraints = true;
                         status = true;
+                        hardConstraints = true;
                         break;
                     }
                 }
 
                 if (status == true)
                 {
+                    hardConstraints = true;
                     break;
                 }
             }
    
             if (hardConstraints == true)
             {
-                assignments.Add(assignment);
+                s.assignments.Add(assignment);
+                assignments.First(x => x.course.Id == assignment.course.Id).timeslot= assignment.timeslot.ShallowCopy();
+                assignments.First(x => x.course.Id == assignment.course.Id).room = assignment.room.ShallowCopy();
+
+                return true;
             }
             else
             {
-                assignments=s.assignments;
+                return false;
             }
+        }
+
+        public Room FindRoom(Timeslot t,Course c,Solution s)
+        {
+            var roomList = new List<Room>();
+            Room room = null;
+            Assignment assignment = null;
+            c = Instance.Courses.Values.First(x => x.Id == c.Id);
+
+            foreach (var i in Instance.Rooms.Values)
+            {
+                if (c.ConstraintValidRooms.Where(x => x.Id == i.Id).Count() < 1)
+                {
+                    roomList.Add(i);
+                }
+            }
+            if (roomList.Where(x => x.Size >= c.Students).Count() > 0)
+            {
+                roomList=roomList.Where(x => x.Size >= c.Students).ToList();
+            }
+            foreach (var r in roomList)
+            {
+                assignment = new Assignment(c, r, t);
+                if (s.SlotRoomConstraint(assignment))
+                {
+                    room = r;
+                    break;
+                }
+            }
+            return room;
         }
     }
 }

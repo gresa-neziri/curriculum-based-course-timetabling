@@ -14,7 +14,7 @@ namespace Curriculum_Based_Course_timetabling
     {
         static void Main(string[] args)
         {
-            IO.Read("FIM S");
+            IO.Read("FIM A");
             string text = "";
             Solution solution = new Solution();
 
