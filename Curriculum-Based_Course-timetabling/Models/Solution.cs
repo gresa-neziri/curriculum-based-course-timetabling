@@ -294,7 +294,14 @@ namespace Curriculum_Based_Course_timetabling.Models
         public void Perturb()
         {
             for (int i = 0; i < 10; i++)
-                SwapCourses();
+                if(Instance.FixedAssignments.Count()>0)
+                {
+                    ChangeTimeslotMutation();
+                } else
+                {
+                    SwapCourses();
+                }
+               
         }
 
         public void ChangeRoomMutation()
