@@ -105,19 +105,27 @@ namespace ccbt
                         //type,course
 
                         //if type of constraint is period
-                        if(constraint.Attributes["type"].InnerText=="period")
+                        if (constraint.Attributes["type"].InnerText == "period")
                         {
-                           
-                                var course = Instance.Courses[constraint.Attributes["course"].InnerText];
-                                foreach (XmlNode timeslot in constraint.ChildNodes)
+
+                            var course = Instance.Courses[constraint.Attributes["course"].InnerText];
+                            foreach (XmlNode timeslot in constraint.ChildNodes)
+                            {
+                                //day,period
+                                //New logic: ex. day 0 period 0 then unavailable periods are 0,1,2,3 because the period is one hour equivalent to four 15 minutes periods
+                                var period = Int32.Parse(timeslot.Attributes["period"].InnerText);
+
+                                for (int i = 0; i < 4; i++)
                                 {
-                                    //day,period
-                                    Timeslot timeslotObject = new Timeslot(Int32.Parse(timeslot.Attributes["day"].InnerText), Int32.Parse(timeslot.Attributes["period"].InnerText));
+                                    Timeslot timeslotObject = new Timeslot(Int32.Parse(timeslot.Attributes["day"].InnerText), period * 4 + i);
                                     course.ConstraintNotAvaliableTimeslots.Add(timeslotObject);
                                 }
-                            
+
+
+                            }
+
                         }
-                         //if type of constraint is room 
+                        //if type of constraint is room 
                         if (constraint.Attributes["type"].InnerText== "room")
                         {
                            
