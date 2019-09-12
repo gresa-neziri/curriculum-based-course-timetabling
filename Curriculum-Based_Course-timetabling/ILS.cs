@@ -1,6 +1,7 @@
 ﻿using Curriculum_Based_Course_timetabling.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,10 +11,12 @@ namespace Curriculum_Based_Course_timetabling
     class ILS
     {
         readonly int iterations;
+        readonly int seconds;
 
-        public ILS(int iterations =200)
+        public ILS(int seconds = 60 , int iterations = 1000)
         {
             this.iterations = iterations;
+            this.seconds = seconds;
         }
 
         public Solution FindSolution()
@@ -31,12 +34,15 @@ namespace Curriculum_Based_Course_timetabling
             Best = Best.Copy(S.assignments);
             var R = new Solution();
 
-            while (iterations_count < iterations && !TimeDifferenceReached(startTime))
+            Stopwatch s = new Stopwatch();
+            s.Start();
+
+            while (iterations_count < iterations && s.Elapsed < TimeSpan.FromSeconds(seconds))
             {
                 int climb_iterations = 0;
                 int time = T[rnd.Next(T.Count)];
 
-                while (iterations_count < iterations && climb_iterations < time && !TimeDifferenceReached(startTime))
+                while (iterations_count < iterations && climb_iterations < time && s.Elapsed < TimeSpan.FromSeconds(seconds))
                 {
                     R = R.Copy(S.assignments);
                     R.Tweak();
@@ -67,6 +73,8 @@ namespace Curriculum_Based_Course_timetabling
                     break;
                 }
             }
+
+            s.Stop();
             return Best;
         }
 
@@ -75,9 +83,9 @@ namespace Curriculum_Based_Course_timetabling
             return S.GetScore() < H.GetScore() ? S : H;
         }
 
-        private bool TimeDifferenceReached(DateTime startTime,double total_execution_minutes = 1)
+        private bool TimeDifferenceReached(DateTime startTime,int total_execution_seconds)
         {
-            bool result = (int)DateTime.Now.Subtract(startTime).TotalMinutes > total_execution_minutes ? true : false;
+            bool result = (int)DateTime.Now.Subtract(startTime).TotalSeconds > total_execution_seconds ? true : false;
             return result;
         }
     }

@@ -18,7 +18,7 @@ namespace Curriculum_Based_Course_timetabling
             string text = "";
             Solution solution = new Solution();
 
-             ILS ils = new ILS();
+             ILS ils = new ILS(70);
             solution = ils.FindSolution();
             foreach (var item in solution.assignments)
             {
